@@ -1,0 +1,135 @@
+.acciones-bar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.btn-accion {
+  padding: 0.6rem 1.4rem;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s;
+}
+
+.btn-accion.verde {
+  background: #27ae60;
+  color: white;
+}
+
+.btn-accion.verde:hover {
+  background: #1e8449;
+  transform: translateY(-1px);
+}
+
+.btn-accion.rojo {
+  background: #e74c3c;
+  color: white;
+}
+
+.btn-accion.rojo:hover {
+  background: #c0392b;
+  transform: translateY(-1px);
+}
+
+.aviso-bd {
+  flex: 1;
+  background: #fef8e8;
+  border: 1px solid #f39c12;
+  color: #d68910;
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  font-weight: 500;
+}
+
+.btn-jefe {
+  background: transparent;
+  border: 1.5px solid #8e44ad;
+  color: #8e44ad;
+  padding: 0.3rem 0.8rem;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-jefe:hover {
+  background: #8e44ad;
+  color: white;
+}
+
+.verde-header { background: linear-gradient(135deg, #27ae60, #1e8449) !important; }
+.rojo-header { background: linear-gradient(135deg, #e74c3c, #c0392b) !important; }
+.azul-header { background: linear-gradient(135deg, #8e44ad, #6c3483) !important; }
+.aviso-header { background: linear-gradient(135deg, #2c3e50, #1a252f) !important; }
+
+.verde-btn { background: linear-gradient(135deg, #27ae60, #1e8449) !important; }
+.rojo-btn { background: linear-gradient(135deg, #e74c3c, #c0392b) !important; }
+
+.aviso-demo {
+  background: #fef8e8;
+  border: 1px solid #f39c12;
+  border-radius: 8px;
+  padding: 0.7rem 1rem;
+  font-size: 0.82rem;
+  color: #d68910;
+  margin-bottom: 1rem;
+}
+
+.aviso-texto {
+  font-size: 0.88rem;
+  color: #2d3748;
+  line-height: 1.6;
+  margin-bottom: 1rem;
+}
+
+.aviso-info {
+  background: #f7f9fc;
+  border-radius: 8px;
+  padding: 1rem;
+  font-size: 0.85rem;
+  color: #4a5568;
+}
+
+.aviso-info strong {
+  display: block;
+  color: #1a2f5e;
+  margin-bottom: 0.5rem;
+}
+
+.aviso-info ul {
+  margin: 0;
+  padding-left: 1.2rem;
+}
+
+.aviso-info li {
+  margin-bottom: 0.3rem;
+}
+
+.modal-aviso-card {
+  max-width: 500px !important;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 0.7rem 1rem;
+  border: 1.5px solid #dde3ee;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  color: #1a2f5e;
+  background: #f7f9fc;
+  box-sizing: border-box;
+  margin-top: 0.3rem;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #1a2f5e;
+  background: white;
+}

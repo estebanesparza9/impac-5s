@@ -1,0 +1,125 @@
+<app-navbar></app-navbar>
+
+<div class="gemba-page">
+
+  <div class="page-header">
+    <div>
+      <h1>🚶 Gemba Walk Directivo</h1>
+      <p>Reporta hallazgos visuales durante recorridos de planta</p>
+    </div>
+    <a routerLink="/dashboard" class="btn-secondary">← Dashboard</a>
+  </div>
+
+  <!-- Formulario nuevo reporte -->
+  <div class="card nuevo-reporte" *ngIf="!reporteGuardado">
+    <h2>Nuevo Reporte de Hallazgos</h2>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Área del recorrido</label>
+        <select [(ngModel)]="areaSeleccionada">
+          <option value="">-- Selecciona el área --</option>
+          <option *ngFor="let a of areas" [value]="a">{{ a }}</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Fotografía del área</label>
+        <label class="btn-upload" for="fileInput">
+          📷 {{ imagenCargada ? 'Cambiar foto' : 'Subir foto' }}
+        </label>
+        <input id="fileInput" type="file" accept="image/*"
+          (change)="onImagenSeleccionada($event)" style="display:none"/>
+      </div>
+    </div>
+
+    <!-- Canvas de imagen con marcadores -->
+    <div class="imagen-container" *ngIf="imagenCargada">
+      <div class="imagen-toolbar">
+        <button class="btn-marcar" [class.activo]="modoAgregar" (click)="toggleModoAgregar()">
+          {{ modoAgregar ? '🎯 Haz clic en la imagen para marcar...' : '📍 Agregar Marcador' }}
+        </button>
+        <span class="marcadores-count">{{ marcadores.length }} marcador(es)</span>
+      </div>
+
+      <div class="imagen-wrap" [class.modo-agregar]="modoAgregar" (click)="onClickImagen($event)">
+        <img [src]="imagenBase64" alt="Foto del área"/>
+        <div class="marcador" *ngFor="let m of marcadores"
+          [style.left.%]="m.x" [style.top.%]="m.y">
+          <div class="marcador-pin">{{ m.numero }}</div>
+        </div>
+      </div>
+
+      <!-- Lista de hallazgos -->
+      <div class="hallazgos-form" *ngIf="marcadores.length > 0">
+        <h3>Describe cada hallazgo:</h3>
+        <div class="hallazgo-input-row" *ngFor="let m of marcadores; let i = index">
+          <div class="hallazgo-num">{{ m.numero }}</div>
+          <input
+            type="text"
+            [(ngModel)]="m.hallazgo"
+            [placeholder]="'Describe el hallazgo #' + m.numero"
+            class="hallazgo-input"/>
+          <button class="btn-eliminar-marcador" (click)="eliminarMarcador(i)">✕</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Acciones -->
+    <div class="form-actions" *ngIf="imagenCargada">
+      <button class="btn-limpiar" (click)="limpiar()">Cancelar</button>
+      <button class="btn-guardar-reporte"
+        [disabled]="!areaSeleccionada || marcadores.length === 0"
+        (click)="guardarReporte()">
+        ✓ Guardar Reporte
+      </button>
+    </div>
+  </div>
+
+  <!-- Reporte guardado exitosamente -->
+  <div class="reporte-guardado" *ngIf="reporteGuardado">
+    <div class="guardado-icon">✅</div>
+    <h2>¡Reporte guardado!</h2>
+    <p>El reporte ha sido enviado a los jefes de área correspondientes.</p>
+    <button class="btn-nuevo" (click)="limpiar()">+ Nuevo Reporte</button>
+  </div>
+
+  <!-- Reportes anteriores -->
+  <div class="reportes-anteriores" *ngIf="reportes.length > 0">
+    <h2>Reportes de Recorridos</h2>
+    <div class="reportes-grid">
+      <div class="reporte-card" *ngFor="let r of reportes">
+        <div class="reporte-card-header">
+          <div>
+            <span class="reporte-area">{{ r.area }}</span>
+            <span class="reporte-fecha">{{ r.fecha }}</span>
+          </div>
+          <span class="reporte-estado" [ngClass]="r.estado">
+            {{ r.estado === 'pendiente' ? '🔴 Pendiente' :
+               r.estado === 'en-proceso' ? '🟡 En proceso' : '🟢 Resuelto' }}
+          </span>
+        </div>
+
+        <div class="reporte-imagen-wrap">
+          <img [src]="r.imagenBase64" alt="Hallazgo"/>
+          <div class="reporte-marcador" *ngFor="let m of r.marcadores"
+            [style.left.%]="m.x" [style.top.%]="m.y">
+            {{ m.numero }}
+          </div>
+        </div>
+
+        <div class="reporte-hallazgos">
+          <div class="reporte-hallazgo-item" *ngFor="let m of r.marcadores">
+            <span class="num-badge">{{ m.numero }}</span>
+            <span>{{ m.hallazgo }}</span>
+          </div>
+        </div>
+
+        <div class="reporte-footer">
+          <span class="reporte-autor">👤 {{ r.creadoPor }}</span>
+          <span class="reporte-marcadores">📍 {{ r.marcadores.length }} hallazgo(s)</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

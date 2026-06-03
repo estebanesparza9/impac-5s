@@ -1,0 +1,125 @@
+<app-navbar></app-navbar>
+
+<div class="cumplimiento-page">
+
+  <div class="page-header">
+    <div>
+      <h1>% Cumplimiento Auditores</h1>
+      <p>Participación en auditorías — {{ nombreMes }} {{ anioActual }}</p>
+    </div>
+    <a routerLink="/dashboard" class="btn-secondary">← Dashboard</a>
+  </div>
+
+  <!-- KPIs -->
+  <div class="kpis-grid">
+    <div class="kpi-card">
+      <div class="kpi-icon azul">👥</div>
+      <div class="kpi-info">
+        <span class="kpi-valor">{{ totalProgramados }}</span>
+        <span class="kpi-label">Auditores programados</span>
+      </div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon verde">✅</div>
+      <div class="kpi-info">
+        <span class="kpi-valor">{{ totalCompletaron }}</span>
+        <span class="kpi-label">Completaron a tiempo</span>
+      </div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon rojo">❌</div>
+      <div class="kpi-info">
+        <span class="kpi-valor">{{ totalNoCumplieron }}</span>
+        <span class="kpi-label">No cumplieron</span>
+      </div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon" [ngClass]="pctParticipacion >= 85 ? 'verde' : 'naranja'">📊</div>
+      <div class="kpi-info">
+        <span class="kpi-valor" [ngClass]="pctParticipacion >= 85 ? 'text-verde' : 'text-naranja'">
+          {{ pctParticipacion }}%
+        </span>
+        <span class="kpi-label">% Participación</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Leyenda estados -->
+  <div class="leyenda-estados">
+    <span class="leyenda-item">
+      <span class="muestra estado-completo">✓</span> Completó a tiempo
+    </span>
+    <span class="leyenda-item">
+      <span class="muestra estado-tarde">⚠</span> Entregó tarde
+    </span>
+    <span class="leyenda-item">
+      <span class="muestra estado-no-cumplio">✗</span> No cumplió
+    </span>
+    <span class="leyenda-item">
+      <span class="muestra estado-sin-area">—</span> Sin área asignada
+    </span>
+  </div>
+
+  <!-- Tabla -->
+  <div class="tabla-wrap">
+    <table class="tabla-cumplimiento">
+      <thead>
+        <tr>
+          <th class="th-planta" colspan="2">PLANTA</th>
+          <th colspan="3" class="th-mes">{{ nombreMes }} {{ anioActual }}</th>
+          <th class="th-resultado">Resultado</th>
+        </tr>
+        <tr>
+          <th class="th-sub">Auditor</th>
+          <th class="th-sub">Área</th>
+          <th class="th-sub center">Auditoría<br>Programada</th>
+          <th class="th-sub center">Cumplimiento</th>
+          <th class="th-sub center">% Cumplimiento</th>
+          <th class="th-sub center">Promedio 5S</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let fila of filas"
+          [ngClass]="{
+            'fila-completo': fila.estado === 'completo',
+            'fila-tarde': fila.estado === 'tarde',
+            'fila-no-cumplio': fila.estado === 'no-cumplió',
+            'fila-sin-area': fila.estado === 'sin-area'
+          }">
+          <td class="td-auditor">
+            <div class="auditor-cell">
+              <span class="auditor-avatar" [ngClass]="'avatar-' + fila.estado">
+                {{ fila.auditor.charAt(0) }}
+              </span>
+              <div>
+                <span class="auditor-nombre">{{ fila.auditor }}</span>
+                <span class="auditor-depto">{{ fila.departamento }}</span>
+              </div>
+            </div>
+          </td>
+          <td class="td-area">{{ fila.area }}</td>
+          <td class="td-center">
+            <span class="num-badge">{{ fila.programada }}</span>
+          </td>
+          <td class="td-center">
+            <span class="num-badge" [ngClass]="fila.cumplimiento > 0 ? 'num-ok' : 'num-no'">
+              {{ fila.cumplimiento }}
+            </span>
+          </td>
+          <td class="td-center">
+            <span class="estado-badge" [ngClass]="'estado-' + fila.estado">
+              {{ getEstadoLabel(fila.estado) }}
+            </span>
+          </td>
+          <td class="td-center">
+            <span *ngIf="fila.promedio > 0" class="prom-badge" [ngClass]="getColorPromedio(fila.promedio)">
+              {{ (fila.promedio * 100).toFixed(0) }}%
+            </span>
+            <span *ngIf="fila.promedio === 0" class="text-gris">—</span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>

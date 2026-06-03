@@ -1,0 +1,164 @@
+<app-navbar></app-navbar>
+
+<div class="jefe-page">
+
+  <!-- Lista de áreas -->
+  <div *ngIf="!areaSeleccionada">
+    <div class="page-header">
+      <div>
+        <h1>Mis Áreas — {{ nombreMes }} {{ anioActual }}</h1>
+        <p>Selecciona un área para ver sus hallazgos y evidencias</p>
+      </div>
+    </div>
+
+    <div class="areas-grid">
+      <div class="area-card" *ngFor="let area of areas" (click)="seleccionarArea(area)">
+        <div class="area-card-header">
+          <span class="area-nombre">{{ area.nombre }}</span>
+          <span class="badge-status" [ngClass]="tieneAuditoria(area.id) ? 'completada' : 'pendiente'">
+            {{ tieneAuditoria(area.id) ? '✓ Auditada' : '⏳ Pendiente' }}
+          </span>
+        </div>
+        <div class="area-card-body" *ngIf="tieneAuditoria(area.id)">
+          <div class="area-promedio" [ngClass]="getColorPorcentaje(getPromedio(area.id))">
+            {{ (getPromedio(area.id) * 100).toFixed(0) }}%
+          </div>
+          <div class="area-barra-wrap">
+            <div class="area-barra" [ngClass]="getColorPorcentaje(getPromedio(area.id))"
+              [style.width.%]="getPromedio(area.id) * 100">
+            </div>
+          </div>
+        </div>
+        <div class="area-card-footer">
+          <span>{{ area.departamento }}</span>
+          <span class="ver-detalle" *ngIf="tieneAuditoria(area.id)">Ver hallazgos →</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Gemba Walk -->
+    <div class="gemba-seccion" *ngIf="gembaReportes.length > 0">
+      <div class="gemba-titulo">
+        <span>Hallazgos Reportados por Superiores en Recorrido</span>
+        <span class="gemba-sub">Registrados durante Gemba Walk directivo — requieren tu atención</span>
+      </div>
+
+      <div class="gemba-grid">
+        <div class="gemba-card" *ngFor="let r of gembaReportes">
+          <div class="gemba-card-header">
+            <div>
+              <span class="gemba-area">{{ r.area }}</span>
+              <span class="gemba-fecha">📅 {{ r.fecha }} — Reportado por: {{ r.creadoPor }}</span>
+            </div>
+          </div>
+
+          <div class="gemba-imagen-wrap" (click)="abrirFoto(r.imagenBase64)">
+            <img [src]="r.imagenBase64" alt="Evidencia recorrido"/>
+            <div class="gemba-marcador" *ngFor="let m of r.marcadores"
+              [style.left.%]="m.x" [style.top.%]="m.y">
+              {{ m.numero }}
+            </div>
+            <div class="gemba-ver-foto">🔍 Ver foto completa</div>
+          </div>
+
+         <div class="gemba-hallazgos-lista">
+  <div class="gemba-hallazgo-row" *ngFor="let m of r.marcadores; let i = index"
+    [class.resuelto]="m.estado === 'resuelto'">
+    <span class="gemba-num">{{ m.numero }}</span>
+    <span class="gemba-texto">{{ m.hallazgo }}</span>
+    <div class="gemba-marcador-btns">
+      <button class="btn-estado-sm"
+        [class.activo-pendiente]="m.estado === 'pendiente'"
+        (click)="toggleEstadoMarcador(r, i, 'pendiente'); $event.stopPropagation()">
+        🔴
+      </button>
+      <button class="btn-estado-sm"
+        [class.activo-proceso]="m.estado === 'en-proceso'"
+        (click)="toggleEstadoMarcador(r, i, 'en-proceso'); $event.stopPropagation()">
+        🟡
+      </button>
+      <button class="btn-estado-sm"
+        [class.activo-resuelto]="m.estado === 'resuelto'"
+        (click)="toggleEstadoMarcador(r, i, 'resuelto'); $event.stopPropagation()">
+        🟢
+      </button>
+    </div>
+    <span class="gemba-check" *ngIf="m.estado === 'resuelto'">✓ Resuelto</span>
+    <span class="gemba-pendiente" *ngIf="m.estado === 'pendiente'">⏳ Pendiente</span>
+    <span class="gemba-proceso" *ngIf="m.estado === 'en-proceso'">🔧 En proceso</span>
+  </div>
+</div>
+
+          <div class="gemba-card-footer">
+            <span>📍 {{ r.marcadores.length }} hallazgo(s) encontrado(s)</span>
+            <span class="gemba-estado-label" [ngClass]="r.estado">
+              {{ r.estado === 'pendiente' ? '🔴 Requiere atención' :
+                 r.estado === 'en-proceso' ? '🟡 En proceso' : '🟢 Completado' }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Detalle de hallazgos -->
+  <div *ngIf="areaSeleccionada">
+    <div class="page-header">
+      <div>
+        <h1>{{ areaSeleccionada.nombre }}</h1>
+        <p>{{ areaSeleccionada.departamento }} — Hallazgos de {{ nombreMes }} {{ anioActual }}</p>
+      </div>
+      <button class="btn-volver" (click)="volverAreas()">← Volver a mis áreas</button>
+    </div>
+
+    <div *ngIf="hallazgos.length === 0" class="sin-hallazgos">
+      <div class="sin-hallazgos-icon">🎉</div>
+      <h2>Sin hallazgos críticos</h2>
+      <p>Esta área no tiene ítems con puntuación 0, 1 ó 2 este mes.</p>
+    </div>
+
+    <div class="hallazgos-lista" *ngIf="hallazgos.length > 0">
+      <div class="hallazgo-card" *ngFor="let h of hallazgos">
+        <div class="hallazgo-header">
+          <span class="hallazgo-seccion">{{ h.seccion }}</span>
+          <span class="hallazgo-badge-critico" *ngIf="h.items.length > 0">
+            {{ h.items.length }} ítem(s) crítico(s)
+          </span>
+        </div>
+        <div class="hallazgo-comentario" *ngIf="h.hallazgo && h.hallazgo !== 'Ninguno'">
+          <span class="hallazgo-label">📝 Comentario del auditor:</span>
+          <p>{{ h.hallazgo }}</p>
+        </div>
+        <div class="items-criticos" *ngIf="h.items.length > 0">
+          <span class="hallazgo-label">Ítems con puntuación crítica:</span>
+          <div class="item-critico-row" *ngFor="let item of h.items">
+            <span class="item-puntuacion critico">{{ item.puntuacion }}/5</span>
+            <span class="item-texto">{{ item.pregunta }}</span>
+          </div>
+        </div>
+        <div class="evidencias" *ngIf="h.fotos && h.fotos.length > 0">
+          <span class="hallazgo-label">📸 Evidencias fotográficas:</span>
+          <div class="fotos-grid">
+            <div class="foto-thumb" *ngFor="let foto of h.fotos" (click)="abrirFoto(foto)">
+              <img [src]="foto" [alt]="'Evidencia ' + h.seccion" />
+              <div class="foto-overlay">🔍 Ver</div>
+            </div>
+          </div>
+        </div>
+        <div class="sin-evidencia" *ngIf="!h.fotos || h.fotos.length === 0">
+          <span>📷 Sin evidencia fotográfica adjunta</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Modal foto -->
+<div class="modal-foto-overlay" *ngIf="modalFotoAbierto" (click)="cerrarFoto()">
+  <div class="modal-foto-card" (click)="$event.stopPropagation()">
+    <button class="btn-cerrar-foto" (click)="cerrarFoto()">✕</button>
+    <img [src]="fotoActual" alt="Evidencia" />
+  </div>
+</div>

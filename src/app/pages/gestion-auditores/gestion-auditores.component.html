@@ -1,0 +1,227 @@
+<app-navbar></app-navbar>
+
+<div class="gestion-page">
+
+  <div class="page-header">
+    <div>
+      <h1>Gestión de Auditores</h1>
+      <p>Asigna, reasigna y administra auditores y jefes de área</p>
+    </div>
+    <a routerLink="/dashboard" class="btn-secondary">← Dashboard</a>
+  </div>
+
+  <div class="mensaje-exito" *ngIf="mensajeExito">{{ mensajeExito }}</div>
+
+  <!-- Acciones rápidas -->
+  <div class="acciones-bar">
+    <button class="btn-accion verde" (click)="abrirModalAgregar()">
+      ➕ Agregar Auditor
+    </button>
+    <button class="btn-accion rojo" (click)="abrirModalEliminar()">
+      🗑 Eliminar Auditor
+    </button>
+    <div class="aviso-bd">
+      ℹ️ Las acciones de agregar/eliminar/cambiar jefe estarán completamente funcionales al conectar la base de datos
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <div class="filtros-bar">
+    <div class="filtro-grupo">
+      <label>Filtrar por departamento</label>
+      <select [(ngModel)]="filtroDepto">
+        <option value="">Todos los departamentos</option>
+        <option *ngFor="let d of departamentos" [value]="d">{{ d }}</option>
+      </select>
+    </div>
+    <div class="stats-bar">
+      <span class="stat"><strong>{{ areas.length }}</strong> áreas totales</span>
+      <span class="stat"><strong>{{ auditores.length }}</strong> auditores</span>
+      <span class="stat"><strong>{{ jefes.length }}</strong> jefes de área</span>
+    </div>
+  </div>
+
+  <!-- Tabla -->
+  <div class="card">
+    <table class="tabla-auditores">
+      <thead>
+        <tr>
+          <th>Área</th>
+          <th>Departamento</th>
+          <th>Auditor Asignado</th>
+          <th>Auditoría Mayo</th>
+          <th>Reasignar Auditor</th>
+          <th>Cambiar Jefe</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let area of areasFiltradas">
+          <td class="td-area">{{ area.nombre }}</td>
+          <td>
+            <span class="badge-depto">{{ area.departamento }}</span>
+          </td>
+          <td>
+            <div class="auditor-cell">
+              <span class="auditor-avatar">{{ area.auditorAsignadoNombre.charAt(0) }}</span>
+              {{ area.auditorAsignadoNombre }}
+            </div>
+          </td>
+          <td>
+            <span class="badge-status" [ngClass]="tieneAuditoria(area.id) ? 'completada' : 'pendiente'">
+              {{ tieneAuditoria(area.id) ? '✓ Completada' : '⏳ Pendiente' }}
+            </span>
+          </td>
+          <td>
+            <button class="btn-reasignar" (click)="abrirModalReasignar(area)">
+              🔄 Reasignar
+            </button>
+          </td>
+          <td>
+            <button class="btn-jefe" (click)="abrirModalJefe(area)">
+              👤 Cambiar Jefe
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<!-- Modal reasignar auditor -->
+<div class="modal-overlay" *ngIf="modalReasignar" (click)="modalReasignar=false">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>🔄 Reasignar Auditor</h3>
+      <button class="btn-cerrar" (click)="modalReasignar=false">✕</button>
+    </div>
+    <div class="modal-body">
+      <p class="modal-area">Área: <strong>{{ areaSeleccionada?.nombre }}</strong></p>
+      <div class="form-group">
+        <label>Selecciona el nuevo auditor</label>
+        <select [(ngModel)]="nuevoAuditorId">
+          <option *ngFor="let a of auditores" [value]="a.id">{{ a.nombre }}</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancelar" (click)="modalReasignar=false">Cancelar</button>
+      <button class="btn-guardar" (click)="guardarReasignacion()">Guardar cambio</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal agregar auditor -->
+<div class="modal-overlay" *ngIf="modalAgregar" (click)="modalAgregar=false">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+    <div class="modal-header verde-header">
+      <h3>➕ Agregar Nuevo Auditor</h3>
+      <button class="btn-cerrar" (click)="modalAgregar=false">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="aviso-demo">
+        ⚠️ <strong>Modo demo:</strong> Esta acción simulará el registro. Con base de datos conectada, el auditor quedará guardado permanentemente.
+      </div>
+      <div class="form-group">
+        <label>Nombre completo</label>
+        <input type="text" [(ngModel)]="nuevoAuditor.nombre" placeholder="Ej. Juan Pérez García"/>
+      </div>
+      <div class="form-group">
+        <label>Correo electrónico</label>
+        <input type="email" [(ngModel)]="nuevoAuditor.email" placeholder="juan.perez@impac.com"/>
+      </div>
+      <div class="form-group">
+        <label>Contraseña inicial</label>
+        <input type="text" [(ngModel)]="nuevoAuditor.password" placeholder="1234"/>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancelar" (click)="modalAgregar=false">Cancelar</button>
+      <button class="btn-guardar verde-btn" (click)="guardarNuevoAuditor()">Agregar Auditor</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal eliminar auditor -->
+<div class="modal-overlay" *ngIf="modalEliminar" (click)="modalEliminar=false">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+    <div class="modal-header rojo-header">
+      <h3>🗑 Eliminar Auditor</h3>
+      <button class="btn-cerrar" (click)="modalEliminar=false">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="aviso-demo">
+        ⚠️ <strong>Modo demo:</strong> Esta acción simulará la eliminación. Con base de datos conectada, el auditor será removido del sistema.
+      </div>
+      <div class="form-group">
+        <label>Selecciona el auditor a eliminar</label>
+        <select [(ngModel)]="auditorEliminarId">
+          <option value="0">-- Selecciona un auditor --</option>
+          <option *ngFor="let a of auditores" [value]="a.id">{{ a.nombre }}</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancelar" (click)="modalEliminar=false">Cancelar</button>
+      <button class="btn-guardar rojo-btn" (click)="confirmarEliminar()"
+        [disabled]="!auditorEliminarId || auditorEliminarId == 0">
+        Eliminar Auditor
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal cambiar jefe -->
+<div class="modal-overlay" *ngIf="modalJefe" (click)="modalJefe=false">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+    <div class="modal-header azul-header">
+      <h3>👤 Cambiar Jefe de Área</h3>
+      <button class="btn-cerrar" (click)="modalJefe=false">✕</button>
+    </div>
+    <div class="modal-body">
+      <p class="modal-area">Área: <strong>{{ areaJefeSeleccionada?.nombre }}</strong></p>
+      <div class="aviso-demo">
+        ⚠️ <strong>Modo demo:</strong> Con base de datos conectada, el jefe tendrá acceso a esta área en su panel.
+      </div>
+      <div class="form-group">
+        <label>Selecciona el nuevo jefe de área</label>
+        <select [(ngModel)]="nuevoJefeId">
+          <option value="0">-- Selecciona un jefe --</option>
+          <option *ngFor="let j of jefes" [value]="j.id">{{ j.nombre }}</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancelar" (click)="modalJefe=false">Cancelar</button>
+      <button class="btn-guardar" (click)="guardarCambioJefe()"
+        [disabled]="!nuevoJefeId || nuevoJefeId == 0">
+        Guardar cambio
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal aviso BD -->
+<div class="modal-overlay" *ngIf="modalAviso" (click)="modalAviso=false">
+  <div class="modal-card modal-aviso-card" (click)="$event.stopPropagation()">
+    <div class="modal-header aviso-header">
+      <h3>🗄️ Funcionalidad con Base de Datos</h3>
+      <button class="btn-cerrar" (click)="modalAviso=false">✕</button>
+    </div>
+    <div class="modal-body">
+      <p class="aviso-texto" [innerHTML]="avisoMensaje"></p>
+      <div class="aviso-info">
+        <strong>¿Qué se necesita para activar esto?</strong>
+        <ul>
+          <li>Backend Node.js + Express</li>
+          <li>Base de datos MySQL o MongoDB</li>
+          <li>API REST para CRUD de usuarios</li>
+          <li>Autenticación JWT</li>
+        </ul>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-guardar" (click)="modalAviso=false">Entendido</button>
+    </div>
+  </div>
+</div>

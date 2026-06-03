@@ -1,0 +1,121 @@
+<app-navbar></app-navbar>
+
+<div class="dashboard-page">
+
+  <div class="page-header">
+    <div>
+      <h1>Dashboard de Auditorías 5S</h1>
+      <p>Resultados del período: <strong>{{ nombreMes }} {{ anioActual }}</strong></p>
+    </div>
+    <a routerLink="/auditores" class="btn-secondary">Gestionar Auditores</a>
+  </div>
+
+  <!-- KPIs -->
+  <div class="kpis-grid">
+    <div class="kpi-card">
+      <div class="kpi-icon azul">📊</div>
+      <div class="kpi-info">
+        <span class="kpi-valor">{{ auditoresCompletaron }}/{{ totalAuditores }}</span>
+        <span class="kpi-label">Auditores completaron</span>
+      </div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon" [ngClass]="getColorPorcentaje(promedioGlobal)">🎯</div>
+      <div class="kpi-info">
+        <span class="kpi-valor">{{ (promedioGlobal * 100).toFixed(1) }}%</span>
+        <span class="kpi-label">Cumplimiento global</span>
+      </div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon naranja">⚠️</div>
+      <div class="kpi-info">
+        <span class="kpi-valor">{{ hallazgosCriticos.length }}</span>
+        <span class="kpi-label">Hallazgos críticos</span>
+      </div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon verde">✅</div>
+      <div class="kpi-info">
+        <span class="kpi-valor">{{ resumenDeptos.length }}</span>
+        <span class="kpi-label">Departamentos auditados</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Gráficas -->
+  <div class="graficas-grid">
+    <div class="card grafica-bar">
+      <h2>Cumplimiento por Departamento</h2>
+      <div class="chart-container">
+        <canvas #chartDepartamentos></canvas>
+      </div>
+      <div class="leyenda">
+        <span class="leyenda-item verde">■ ≥85% Objetivo</span>
+        <span class="leyenda-item amarillo">■ 70-84%</span>
+        <span class="leyenda-item naranja">■ 60-69%</span>
+        <span class="leyenda-item rojo">■ &lt;60% Crítico</span>
+      </div>
+    </div>
+
+    <div class="card grafica-donut">
+      <h2>Cumplimiento Global IMPAC</h2>
+      <div class="donut-container">
+        <canvas #chartGlobal></canvas>
+        <div class="donut-label">
+          <span class="donut-pct" [ngClass]="getColorPorcentaje(promedioGlobal)">
+            {{ (promedioGlobal * 100).toFixed(0) }}%
+          </span>
+          <span class="donut-sub">Objetivo ≥85%</span>
+        </div>
+      </div>
+      <div class="deptos-list">
+        <div class="depto-row" *ngFor="let d of resumenDeptos">
+          <span class="depto-nombre">{{ d.departamento }}</span>
+          <div class="depto-bar-wrap">
+            <div class="depto-bar" [ngClass]="getColorPorcentaje(d.promedio)"
+              [style.width.%]="d.promedio * 100">
+            </div>
+          </div>
+          <span class="depto-pct" [ngClass]="getColorPorcentaje(d.promedio)">
+            {{ (d.promedio * 100).toFixed(0) }}%
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hallazgos críticos -->
+  <div class="card hallazgos-card">
+    <h2>⚠️ Hallazgos Críticos (puntuación 0, 1 ó 2)</h2>
+    <p class="hallazgos-sub">Estos ítems requieren plan de acción inmediato</p>
+
+    <div class="tabla-container">
+      <table class="tabla-hallazgos">
+        <thead>
+          <tr>
+            <th>Área</th>
+            <th>Sección 5S</th>
+            <th>Ítem</th>
+            <th>Puntuación</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let h of hallazgosCriticos">
+            <td>{{ h.area }}</td>
+            <td><span class="badge-s">{{ h.seccion }}</span></td>
+            <td>{{ h.hallazgo }}</td>
+            <td>
+              <span class="badge-puntuacion" [ngClass]="getColorPuntuacion(h.puntuacion)">
+                {{ h.puntuacion }}/5
+              </span>
+            </td>
+          </tr>
+          <tr *ngIf="hallazgosCriticos.length === 0">
+            <td colspan="4" class="sin-datos">🎉 No hay hallazgos críticos este mes</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>

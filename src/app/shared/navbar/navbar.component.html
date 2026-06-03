@@ -1,0 +1,41 @@
+<nav class="navbar">
+  <div class="navbar-brand">
+    <div class="brand-logos">
+     <img src="/assets/impac-logo.png" alt="IMPAC" class="navbar-logo" style="height:40px"/>
+      <div class="brand-text">
+        <div class="brand-names">
+          <span class="brand-impac">IMPAC</span>
+          <span class="brand-divider">|</span>
+          <span class="brand-sg">SAINT-GOBAIN</span>
+        </div>
+        <span class="brand-subtitle">Sistema de Auditorías 5S</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="navbar-links" *ngIf="auth.isLoggedIn()">
+    <ng-container *ngIf="auth.isAdmin()">
+      <a routerLink="/dashboard" routerLinkActive="active">Dashboard</a>
+      <a routerLink="/auditores" routerLinkActive="active">Auditores</a>
+      <a routerLink="/resultados" routerLinkActive="active">Resultados</a>
+      <a routerLink="/cumplimiento" routerLinkActive="active">Cumplimiento</a>
+      <a routerLink="/gemba" routerLinkActive="active" class="nav-gemba">Gemba Walk</a>
+    </ng-container>
+    <ng-container *ngIf="auth.isAuditor()">
+      <a routerLink="/auditoria" routerLinkActive="active">Mi Auditoría</a>
+    </ng-container>
+    <ng-container *ngIf="auth.isJefe()">
+      <a routerLink="/jefe" routerLinkActive="active">Mis Áreas</a>
+    </ng-container>
+  </div>
+
+  <div class="navbar-user" *ngIf="auth.isLoggedIn()">
+    <div class="user-info">
+      <span class="user-name">{{ auth.getUsuarioActual()?.nombre }}</span>
+      <span class="user-rol">
+        {{ auth.isAdmin() ? 'Administrador' : auth.isJefe() ? 'Jefe de Área' : 'Auditor' }}
+      </span>
+    </div>
+    <button class="btn-logout" (click)="logout()">Cerrar sesión</button>
+  </div>
+</nav>

@@ -1,0 +1,67 @@
+<div class="login-page">
+  <div class="login-bg">
+    <div class="bg-circle c1"></div>
+    <div class="bg-circle c2"></div>
+    <div class="bg-circle c3"></div>
+  </div>
+
+  <div class="login-card">
+    <div class="login-header">
+      <div class="logo-container">
+        <div class="logo-impac">IMPAC</div>
+        <div class="logo-sg">SAINT-GOBAIN</div>
+      </div>
+      <h1>Sistema de Auditorías 5S</h1>
+      <p>Ingresa tus credenciales para continuar</p>
+    </div>
+
+    <div class="login-body">
+      <div class="form-group">
+        <label>Correo electrónico</label>
+        <input
+          type="email"
+          [(ngModel)]="email"
+          placeholder="usuario@impac.com"
+          (keyup.enter)="login()"
+        />
+      </div>
+
+      <div class="form-group">
+        <label>Contraseña</label>
+        <input
+          type="password"
+          [(ngModel)]="password"
+          placeholder="••••••••"
+          (keyup.enter)="login()"
+        />
+      </div>
+
+      <div class="error-msg" *ngIf="error">
+        <span>⚠ {{ error }}</span>
+      </div>
+
+      <button class="btn-login" (click)="login()" [disabled]="cargando">
+        <span *ngIf="!cargando">Iniciar sesión</span>
+        <span *ngIf="cargando" class="loading">Verificando...</span>
+      </button>
+    </div>
+
+    <div class="login-footer">
+  <div class="cuentas-demo">
+    <p class="demo-title">Cuentas de prueba:</p>
+    <div class="demo-item">
+      <span class="demo-rol admin">Admin</span>
+      <span>admin&#64;impac.com / admin123</span>
+    </div>
+    <div class="demo-item">
+      <span class="demo-rol auditor">Auditor</span>
+      <span>brandon&#64;impac.com / 1234</span>
+    </div>
+    <div class="demo-item">
+      <span class="demo-rol jefe">Jefe</span>
+      <span>jefe.ehs&#64;impac.com / 1234</span>
+    </div>
+  </div>
+</div>
+  </div>
+</div>

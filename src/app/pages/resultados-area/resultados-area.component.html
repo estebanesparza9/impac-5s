@@ -1,0 +1,170 @@
+<app-navbar></app-navbar>
+
+<div class="resultados-page">
+
+  <div class="page-header">
+    <div>
+      <h1>Resultados de Auditorías 5S</h1>
+      <p>Detalle por ítem — {{ nombreMes }} {{ anioActual }}</p>
+    </div>
+    <a routerLink="/dashboard" class="btn-secondary">← Dashboard</a>
+  </div>
+
+  <div class="leyenda-colores">
+    <span class="leyenda-item"><span class="muestra celda-critico">0-1</span> Crítico</span>
+    <span class="leyenda-item"><span class="muestra celda-alerta">2</span> Alerta</span>
+    <span class="leyenda-item"><span class="muestra celda-ok">3</span> Aceptable</span>
+    <span class="leyenda-item"><span class="muestra celda-bien">4-5</span> Bien</span>
+    <span class="leyenda-item"><span class="muestra celda-vacia">—</span> Sin auditar</span>
+  </div>
+
+  <div class="tabla-wrap">
+    <table class="tabla-resultados">
+      <thead>
+        <tr class="tr-seccion">
+          <th rowspan="2" class="th-depto">Departamento</th>
+          <th rowspan="2" class="th-area">Área</th>
+          <th colspan="8" class="th-grupo seiri">SEIRI (Clasificar)</th>
+          <th colspan="9" class="th-grupo seiton">SEITON (Ordenar)</th>
+          <th colspan="8" class="th-grupo seiso">SEISO (Limpiar)</th>
+          <th colspan="5" class="th-grupo seiketsu">SEIKETSU (Estandarizar)</th>
+          <th colspan="7" class="th-grupo shitsuke">SHITSUKE (Disciplina)</th>
+          <th rowspan="2" class="th-avg">Avg</th>
+        </tr>
+        <tr class="tr-items">
+          <th *ngFor="let n of [1,2,3,4,5,6,7]" class="th-item seiri-bg">{{n}}</th>
+          <th class="th-h seiri-bg">H</th>
+          <th *ngFor="let n of [1,2,3,4,5,6,7,8]" class="th-item seiton-bg">{{n}}</th>
+          <th class="th-h seiton-bg">H</th>
+          <th *ngFor="let n of [1,2,3,4,5,6,7]" class="th-item seiso-bg">{{n}}</th>
+          <th class="th-h seiso-bg">H</th>
+          <th *ngFor="let n of [1,2,3,4]" class="th-item seiketsu-bg">{{n}}</th>
+          <th class="th-h seiketsu-bg">H</th>
+          <th *ngFor="let n of [1,2,3,4,5,6]" class="th-item shitsuke-bg">{{n}}</th>
+          <th class="th-h shitsuke-bg">H</th>
+        </tr>
+      </thead>
+      <tbody>
+        <ng-container *ngFor="let depto of departamentos; let di = index">
+          <tr *ngFor="let area of depto.areas; let ai = index"
+            [class.fila-sin-auditar]="!area.auditada">
+            <td class="td-depto" [style.background]="getColorDepto(di)"
+              *ngIf="ai === 0" [attr.rowspan]="depto.areas.length">
+              <div class="depto-nombre">{{ depto.nombre }}</div>
+              <div class="depto-resp">{{ depto.responsable }}</div>
+            </td>
+            <td class="td-area">{{ area.nombre }}</td>
+
+            <!-- SEIRI items -->
+            <ng-container *ngIf="area.auditada">
+              <td *ngFor="let val of area.seiri" class="td-item">
+                <span class="celda-item" [ngClass]="getColorItem(val, area.auditada)">{{val}}</span>
+              </td>
+              <td *ngFor="let _ of [].constructor(7 - area.seiri.length)" class="td-item">
+                <span class="celda-item celda-vacia">—</span>
+              </td>
+            </ng-container>
+            <ng-container *ngIf="!area.auditada">
+              <td *ngFor="let _ of [].constructor(7)" class="td-item">
+                <span class="celda-item celda-vacia">—</span>
+              </td>
+            </ng-container>
+            <td class="td-h">
+              <span *ngIf="area.hSeiri > 0" class="badge-h">{{area.hSeiri}}</span>
+              <span *ngIf="area.hSeiri === 0 && area.auditada">0</span>
+              <span *ngIf="!area.auditada">—</span>
+            </td>
+
+            <!-- SEITON items -->
+            <ng-container *ngIf="area.auditada">
+              <td *ngFor="let val of area.seiton" class="td-item">
+                <span class="celda-item" [ngClass]="getColorItem(val, area.auditada)">{{val}}</span>
+              </td>
+              <td *ngFor="let _ of [].constructor(8 - area.seiton.length)" class="td-item">
+                <span class="celda-item celda-vacia">—</span>
+              </td>
+            </ng-container>
+            <ng-container *ngIf="!area.auditada">
+              <td *ngFor="let _ of [].constructor(8)" class="td-item">
+                <span class="celda-item celda-vacia">—</span>
+              </td>
+            </ng-container>
+            <td class="td-h">
+              <span *ngIf="area.hSeiton > 0" class="badge-h">{{area.hSeiton}}</span>
+              <span *ngIf="area.hSeiton === 0 && area.auditada">0</span>
+              <span *ngIf="!area.auditada">—</span>
+            </td>
+
+            <!-- SEISO items -->
+            <ng-container *ngIf="area.auditada">
+              <td *ngFor="let val of area.seiso" class="td-item">
+                <span class="celda-item" [ngClass]="getColorItem(val, area.auditada)">{{val}}</span>
+              </td>
+              <td *ngFor="let _ of [].constructor(7 - area.seiso.length)" class="td-item">
+                <span class="celda-item celda-vacia">—</span>
+              </td>
+            </ng-container>
+            <ng-container *ngIf="!area.auditada">
+              <td *ngFor="let _ of [].constructor(7)" class="td-item">
+                <span class="celda-item celda-vacia">—</span>
+              </td>
+            </ng-container>
+            <td class="td-h">
+              <span *ngIf="area.hSeiso > 0" class="badge-h">{{area.hSeiso}}</span>
+              <span *ngIf="area.hSeiso === 0 && area.auditada">0</span>
+              <span *ngIf="!area.auditada">—</span>
+            </td>
+
+            <!-- SEIKETSU items -->
+            <ng-container *ngIf="area.auditada">
+              <td *ngFor="let val of area.seiketsu" class="td-item">
+                <span class="celda-item" [ngClass]="getColorItem(val, area.auditada)">{{val}}</span>
+              </td>
+              <td *ngFor="let _ of [].constructor(4 - area.seiketsu.length)" class="td-item">
+                <span class="celda-item celda-vacia">—</span>
+              </td>
+            </ng-container>
+            <ng-container *ngIf="!area.auditada">
+              <td *ngFor="let _ of [].constructor(4)" class="td-item">
+                <span class="celda-item celda-vacia">—</span>
+              </td>
+            </ng-container>
+            <td class="td-h">
+              <span *ngIf="area.hSeiketsu > 0" class="badge-h">{{area.hSeiketsu}}</span>
+              <span *ngIf="area.hSeiketsu === 0 && area.auditada">0</span>
+              <span *ngIf="!area.auditada">—</span>
+            </td>
+
+            <!-- SHITSUKE items -->
+            <ng-container *ngIf="area.auditada">
+              <td *ngFor="let val of area.shitsuke" class="td-item">
+                <span class="celda-item" [ngClass]="getColorItem(val, area.auditada)">{{val}}</span>
+              </td>
+              <td *ngFor="let _ of [].constructor(6 - area.shitsuke.length)" class="td-item">
+                <span class="celda-item celda-vacia">—</span>
+              </td>
+            </ng-container>
+            <ng-container *ngIf="!area.auditada">
+              <td *ngFor="let _ of [].constructor(6)" class="td-item">
+                <span class="celda-item celda-vacia">—</span>
+              </td>
+            </ng-container>
+            <td class="td-h">
+              <span *ngIf="area.hShitsuke > 0" class="badge-h">{{area.hShitsuke}}</span>
+              <span *ngIf="area.hShitsuke === 0 && area.auditada">0</span>
+              <span *ngIf="!area.auditada">—</span>
+            </td>
+
+            <!-- Promedio general -->
+            <td class="td-avg-val">
+              <span class="prom-badge" [ngClass]="getColorPromedio(area.promedioGeneral)">
+                {{ formatPct(area.promedioGeneral) }}
+              </span>
+            </td>
+          </tr>
+        </ng-container>
+      </tbody>
+    </table>
+  </div>
+
+</div>

@@ -1,0 +1,181 @@
+<app-navbar></app-navbar>
+
+<div class="form-page">
+
+  <!-- Fuera de tiempo -->
+  <div class="aviso-critico" *ngIf="fueraDeTiempo && !yaCompletada">
+    <span>🔒</span>
+    <div>
+      <strong>Período cerrado</strong>
+      <p>El plazo para entregar la auditoría de este mes venció el día {{ diaLimite }}. Tu participación será registrada como NO completada.</p>
+    </div>
+  </div>
+
+  <!-- Ya completada -->
+  <div class="aviso-exito" *ngIf="yaCompletada && !enviada">
+    <span>✅</span>
+    <div>
+      <strong>Auditoría ya completada</strong>
+      <p>Ya entregaste tu auditoría de este mes. Aquí puedes consultar tus respuestas.</p>
+    </div>
+  </div>
+
+  <!-- Enviada exitosamente -->
+  <div class="enviado-page" *ngIf="enviada">
+    <div class="enviado-card">
+      <div class="enviado-icon">🎉</div>
+      <h2>¡Auditoría enviada!</h2>
+      <p>Tu auditoría ha sido registrada correctamente.</p>
+      <div class="enviado-resumen">
+        <div class="resumen-item" *ngFor="let s of secciones">
+          <span class="resumen-s" [style.background]="getColorSeccion(s.nombre)">
+            {{ s.nombre }}
+          </span>
+          <span class="resumen-nombre">{{ s.nombreEs }}</span>
+          <div class="resumen-bar-wrap">
+            <div class="resumen-bar"
+              [style.width.%]="calcularPromedio(s) * 100"
+              [style.background]="getColorSeccion(s.nombre)">
+            </div>
+          </div>
+          <span class="resumen-pct">{{ (calcularPromedio(s) * 100).toFixed(0) }}%</span>
+        </div>
+      </div>
+      <div class="enviado-total">
+        Promedio general:
+        <strong>{{ (secciones.reduce((s,a) => s + calcularPromedio(a), 0) / secciones.length * 100).toFixed(1) }}%</strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- Formulario principal -->
+  <div *ngIf="!enviada">
+
+    <!-- Header del auditor -->
+    <div class="auditoria-header">
+      <div class="header-info">
+        <h1>Auditoría 5S — {{ nombreMes ?? 'Mayo' }} {{ anioActual }}</h1>
+        <p>Auditor: <strong>{{ auth.getUsuarioActual()?.nombre }}</strong></p>
+        <p *ngIf="area">Área asignada: <strong>{{ area.nombre }}</strong> — {{ area.departamento }}</p>
+        <p *ngIf="!area" class="sin-area">⚠ No tienes un área asignada este mes. Contacta al administrador.</p>
+      </div>
+      <div class="header-progreso">
+        <div class="progreso-circle">
+          <svg viewBox="0 0 36 36">
+            <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+              fill="none" stroke="#eef1f7" stroke-width="3"/>
+            <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+              fill="none" stroke="#e8734a" stroke-width="3"
+              [attr.stroke-dasharray]="progresoTotal + ', 100'"/>
+          </svg>
+          <span>{{ progresoTotal }}%</span>
+        </div>
+        <p>Progreso total</p>
+      </div>
+    </div>
+
+    <!-- Tabs de secciones -->
+    <div class="secciones-tabs">
+      <button
+        *ngFor="let s of secciones; let i = index"
+        class="tab-btn"
+        [class.activo]="i === seccionActual"
+        [class.completo]="s.items.every(item => item.puntuacion >= 0)"
+        [style.border-color]="i === seccionActual ? getColorSeccion(s.nombre) : 'transparent'"
+        (click)="irASeccion(i)">
+        <span class="tab-check" *ngIf="s.items.every(item => item.puntuacion >= 0)">✓</span>
+        <span class="tab-nombre">{{ s.nombre }}</span>
+        <span class="tab-es">{{ s.nombreEs }}</span>
+      </button>
+    </div>
+
+    <!-- Sección activa -->
+    <div class="seccion-card" *ngIf="area">
+      <div class="seccion-header" [style.border-left-color]="getColorSeccion(seccion.nombre)">
+        <div>
+          <h2 [style.color]="getColorSeccion(seccion.nombre)">
+            {{ seccion.nombre }} — {{ seccion.nombreEs }}
+          </h2>
+          <p>Evalúa cada ítem del 0 al 5 según el grado de cumplimiento</p>
+        </div>
+        <div class="seccion-progreso">
+          {{ seccion.items.filter(i => i.puntuacion >= 0).length }}/{{ seccion.items.length }} ítems
+        </div>
+      </div>
+
+      <!-- Guía rápida -->
+      <div class="guia-rapida">
+        <span *ngFor="let g of [
+          {v:0, label:'Sin implementación', color:'#e74c3c'},
+          {v:1, label:'Muy básico', color:'#e74c3c'},
+          {v:2, label:'Inconsistente', color:'#e67e22'},
+          {v:3, label:'Parcial', color:'#f39c12'},
+          {v:4, label:'Sólido', color:'#27ae60'},
+          {v:5, label:'Excelente', color:'#1e8449'}
+        ]" class="guia-item">
+          <span class="guia-num" [style.background]="g.color">{{ g.v }}</span>
+          <span class="guia-label">{{ g.label }}</span>
+        </span>
+      </div>
+
+      <!-- Items -->
+      <div class="items-lista">
+        <div class="item-row" *ngFor="let item of seccion.items"
+          [class.item-critico]="item.puntuacion >= 0 && item.puntuacion <= 2">
+          <div class="item-pregunta">
+            <span class="item-id">{{ item.id }}</span>
+            <span>{{ item.pregunta }}</span>
+          </div>
+          <div class="puntuacion-btns">
+            <button
+              *ngFor="let v of [0,1,2,3,4,5]"
+              class="btn-puntuacion"
+              [class.seleccionado]="item.puntuacion === v"
+              [class.critico]="v <= 2"
+              [class.bueno]="v >= 3"
+              [disabled]="yaCompletada"
+              (click)="setPuntuacion(item.id, v)">
+              {{ v }}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Hallazgo -->
+      <div class="hallazgo-section">
+        <label>
+          📝 Hallazgo o Comentario en <strong>{{ seccion.nombre }}</strong>
+          <span class="hallazgo-hint">(Describe claramente los errores encontrados)</span>
+        </label>
+        <textarea
+          [(ngModel)]="seccion.hallazgo"
+          [disabled]="yaCompletada"
+          placeholder="Describe los hallazgos encontrados en esta sección. Si no hay hallazgos escribe 'Ninguno'."
+          rows="3">
+        </textarea>
+      </div>
+
+      <!-- Navegación -->
+      <div class="navegacion">
+        <button class="btn-nav anterior" (click)="seccionAnterior()" [disabled]="seccionActual === 0">
+          ← Anterior
+        </button>
+        <button
+          *ngIf="seccionActual < secciones.length - 1"
+          class="btn-nav siguiente"
+          (click)="siguienteSeccion()"
+          [style.background]="getColorSeccion(seccion.nombre)">
+          Siguiente: {{ secciones[seccionActual + 1].nombre }} →
+        </button>
+        <button
+          *ngIf="seccionActual === secciones.length - 1 && !yaCompletada"
+          class="btn-enviar"
+          [disabled]="!todasCompletas || fueraDeTiempo"
+          (click)="enviarAuditoria()">
+          {{ todasCompletas ? '✓ Enviar Auditoría' : 'Completa todos los ítems para enviar' }}
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>

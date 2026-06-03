@@ -1,0 +1,140 @@
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2rem;
+  height: 64px;
+  background: linear-gradient(135deg, #1a2f5e 0%, #0d1f3c 100%);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.brand-logos {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.brand-impac {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: 2px;
+}
+
+.brand-divider {
+  color: #e8734a;
+  font-weight: 300;
+}
+
+.brand-sg {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #7eb3e8;
+  letter-spacing: 1px;
+}
+
+.brand-subtitle {
+  display: block;
+  font-size: 0.7rem;
+  color: #a0b4cc;
+  letter-spacing: 1px;
+  margin-top: 2px;
+}
+
+.navbar-brand {
+  display: flex;
+  flex-direction: column;
+}
+
+.navbar-links {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.navbar-links a {
+  color: #a0b4cc;
+  text-decoration: none;
+  padding: 0.4rem 1rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.navbar-links a:hover,
+.navbar-links a.active {
+  color: #ffffff;
+  background: rgba(255,255,255,0.1);
+}
+
+.navbar-user {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.user-name {
+  color: #ffffff;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.user-rol {
+  color: #e8734a;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.btn-logout {
+  background: rgba(232, 115, 74, 0.15);
+  border: 1px solid #e8734a;
+  color: #e8734a;
+  padding: 0.35rem 0.9rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-logout:hover {
+  background: #e8734a;
+  color: white;
+}
+
+.navbar-logo {
+  height: 40px;
+  width: auto;
+  object-fit: contain;
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.brand-names {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.nav-gemba {
+  background: rgba(232,115,74,0.15) !important;
+  color: #e8734a !important;
+  border: 1px solid rgba(232,115,74,0.3);
+}
+
+.nav-gemba:hover, .nav-gemba.active {
+  background: #e8734a !important;
+  color: white !important;
+}
